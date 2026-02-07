@@ -33,13 +33,7 @@ def normalize_romanian(text: str, nfc: bool = True) -> str:
     Returns:
         Textul normalizat.
     """
-    # 1) Corectare sedilă -> virgulă
     if any(ch in text for ch in _SEDILLA_TO_COMMA):
         for src, dst in _SEDILLA_TO_COMMA.items():
             text = text.replace(src, dst)
-
-    # 2) NFC (forme precompuse pentru ă/Ă, â/Â, î/Î etc.)
-    if nfc:
-        text = unicodedata.normalize("NFC", text)
-
-    return text
+    return unicodedata.normalize("NFC", text) if nfc else text
