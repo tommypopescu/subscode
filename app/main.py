@@ -2,7 +2,7 @@
 import os, time
 from pathlib import Path
 import chardet
-from normalizer import normalize_romanian
+from .normalizer import normalize_romanian
 
 ENV = lambda k, d=None: os.environ.get(k, d)
 
