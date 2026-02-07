@@ -1,0 +1,3 @@
+chardet==5.*     # detectare encoding universală
+watchdog==6.*    # file system watcher cross-platform
+``
