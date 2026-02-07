@@ -1,4 +1,3 @@
-# .github/workflows/build.yml
 name: Build & Publish to GHCR
 
 on:
@@ -9,11 +8,11 @@ on:
 
 permissions:
   contents: read
-  packages: write  # necesar pentru push în ghcr.io cu GITHUB_TOKEN
+  packages: write     # necesar pentru push în ghcr.io
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}   # <owner>/<repo> (atenție: lowercase la nivel de repository)
+  IMAGE_NAME: ${{ github.repository }}   # <owner>/<repo>
 
 jobs:
   build-and-push:
@@ -21,6 +20,12 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+
+      - name: Lowercase image name (defensiv)
+        id: names
+        shell: bash
+        run: |
+          echo "IMAGE_NAME_LC=${IMAGE_NAME,,}" >> $GITHUB_ENV
 
       - name: Log in to GHCR (via GITHUB_TOKEN)
         uses: docker/login-action@v3
@@ -32,15 +37,26 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build & Push (multi-arch)
+      # 1) Push mereu: latest + sha
+      - name: Build & Push (latest + sha)
         uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile
           push: true
           platforms: linux/amd64,linux/arm64
-          # publicăm latest + sha; pe tag publicăm și numele tag-ului
           tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_type == 'tag' && github.ref_name || '' }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LC }}:latest
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LC }}:${{ github.sha }}
+
+      # 2) Push tag DOAR când rulează pe tag (evită tag gol)
+      - name: Build & Push (release tag)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LC }}:${{ github.ref_name }}
