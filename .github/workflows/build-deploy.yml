@@ -1,14 +1,14 @@
 name: Build & Deploy
+
 on:
   push:
-    branches: [ "main" ]
-  push:
-    tags: [ "v*" ]          # pornește și la tag-uri (ex. v0.2.0)
-  workflow_dispatch: {}
+    branches: [ "main" ]        # rulează la push pe main
+    tags:     [ "v*" ]          # rulează și la tag-uri (ex. v0.2.0)
+  workflow_dispatch: {}          # run manual din Actions
 
 permissions:
   contents: read
-  packages: write           # necesar pentru GHCR
+  packages: write                # necesar pentru push în ghcr.io
 
 env:
   REGISTRY: ghcr.io
