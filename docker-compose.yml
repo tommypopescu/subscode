@@ -1,0 +1,22 @@
+version: "3.9"
+services:
+  utf8-fixer:
+    image: ghcr.io/ORG/REPO:latest   # înlocuiește cu org/repo
+    container_name: utf8-sub-fixer
+    restart: unless-stopped
+    environment:
+      WATCH_MODE: "watch"                   # sau "scan"
+      SCAN_INTERVAL_S: "900"
+      FILE_EXTS: "srt,ass,ssa,vtt,sub,txt"
+      WATCH_PATHS: "/sources/movies,/sources/series,/sources/downloads"
+      BACKUP_DIR: "/backup"
+      BACKUP_ORIGINAL: "true"
+      BACKUP_CONVERTED: "true"
+      NORMALIZE_RO: "true"
+      NORMALIZE_NFC: "true"
+      REMOVE_BOM: "true"
+    volumes:
+      - /data/movies:/sources/movies:rw
+      - /data/series:/sources/series:rw
+      - /data/downloads:/sources/downloads:rw
+      - /data/subtitle_backups:/backup:rw
